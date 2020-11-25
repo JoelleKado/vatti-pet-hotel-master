@@ -53,7 +53,51 @@ def petStuff():
 def petChange(id):
     if request.method == 'DELETE':
         return delPet(id)
+    if request.method == 'PUT':
+        print('INSIDE PUT IF: ', request.form)
+        return checkInPet(id, request.form)
 
+
+def checkInPet(petId, checkInDate):
+    print('Check In pets', petId)
+    print('Check in pets', checkInDate['date'])
+    if checkInDate['date'] == '':
+      print('check in date does not exist')
+    else:
+      print('check in date:', checkInDate['date'])
+      
+
+    cursor = None
+    response = None
+
+    try:
+        # Get a connection, use that to get a cursor
+        conn = get_db_conn()
+        cursor = conn.cursor()
+
+        # TODO Database INSERT
+        if checkInDate['date'] == '':
+          sql = 'UPDATE pets SET checkIn = current_timestamp WHERE id=%s;'
+        else:
+          sql = 'UPDATE pets SET checkIn = null WHERE id=%s;'
+        
+        cursor.execute(sql, (petId))
+
+        # IMPORTANT - FOR Add, Update, Delete - Make sure to commit!!!
+        conn.commit()
+        response = {'msg': 'Deleted pet'}, 201
+
+        # python equivalent of catch
+    except psycopg2.Error as e:
+        print('Error from DB', e.pgerror)
+        response = {'msg': 'Error Adding pet'}, 500
+      # python equivalent of finally
+    else:
+        if cursor:
+          # close the cursor
+          cursor.close()
+
+    return response
 
 def delPet(petId):
     print('Deleting pets', petId)
@@ -62,7 +106,7 @@ def delPet(petId):
     response = None
 
     try:
-        # Get a connection, use that to get a cursor
+         # Get a connection, use that to get a cursor
         conn = get_db_conn()
         cursor = conn.cursor()
 
@@ -81,11 +125,10 @@ def delPet(petId):
     # python equivalent of finally
     else:
         if cursor:
-            # close the cursor
+             # close the cursor
             cursor.close()
 
     return response
-
 
 def addPet(pet):
     print('Adding pets', pet)
@@ -117,7 +160,6 @@ def addPet(pet):
             cursor.close()
 
     return response
-
 
 def getAllPets():
     # Get a connection, use that to get a cursor

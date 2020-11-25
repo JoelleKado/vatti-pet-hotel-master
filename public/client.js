@@ -36,12 +36,17 @@ function renderPets(pets) {
         $tr.append(`<td>${each[1]}</td>`)
         $tr.append(`<td>${each[2]}</td>`)
         $tr.append(`<td>${each[3]}</td>`)
-        $tr.append(`<td>${each[4]}</td>`)
+        if (each[4] == null) { 
+            $tr.append(`<td>no</td>`)
+        } else {
+            $tr.append(`<td>${each[4]}</td>`)
+        }
 
         $tr.append(`<button class="deleteButton">Delete</button>`);
-        $tr.append(`<button class="checkInButton">Check In</button>`);
+        $tr.append(`<button class="checkInButton" data-date="${each[4]}">Check In</button>`);
 
         $('#petHotelRooms').append($tr)
+
     }
     
 }
@@ -69,6 +74,22 @@ function handleClick() {
 
 function handleCheckIn(){
     console.log('in handleCheckIn');
+    let petId = $(this).closest('tr').data('id');
+    let dateValue = $(this).data('date')
+    let checkInDate = {date: dateValue}
+    
+
+    console.log('inside handleCheckIn, date:', checkInDate);
+    $.ajax({
+        method: 'PUT', //update
+        url: `/pet/${petId}`,//req.params
+        data: checkInDate //req.body
+      }).then(function(response){
+        console.log(response);
+        getPets();
+      }).catch(function(){
+        
+      })
 }
 
 function handleDelete(){
